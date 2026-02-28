@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
     Return ONLY the JSON object, no additional text.
     `;
 
-    const message = await openai.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+    const message = await openai.chat.completions.create({
+      model: "gpt-4o",
       max_tokens: 2048,
       messages: [
         {
@@ -85,8 +85,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Extract JSON from response
-    const responseText =
-      message.content[0].type === "text" ? message.content[0].text : "";
+    const responseText = message.choices[0].message.content || "";
 
     // Parse JSON response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
