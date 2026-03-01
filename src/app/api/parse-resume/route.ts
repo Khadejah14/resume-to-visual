@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import pdfParse from "pdf-parse";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
@@ -18,7 +17,10 @@ export async function POST(request: NextRequest) {
     // Convert file to buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Parse PDF
+    // Parse PDF using dynamic import to handle CJS/ESM interop
+    const pdfParseModule = await import("pdf-parse");
+    // `pdf-parse` may export as default (CJS) or named; handle both
+    const pdfParse = (pdfParseModule && (pdfParseModule.default ?? pdfParseModule)) as any;
     const pdfData = await pdfParse(buffer);
     const pdfText = pdfData.text;
 
