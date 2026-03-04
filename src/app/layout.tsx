@@ -1,14 +1,15 @@
-import "../../styles/globals.css";
+import type { Metadata } from 'next'
+import './globals.css'
 
-export const metadata = {
-  title: "Resume to Visual",
-  description: "Convert resumes into visual experiences",
-};
+export const metadata: Metadata = {
+  title: 'Resume-to-Visual',
+  description: 'Upload a PDF resume, AI extracts structured data, download a visual HTML resume',
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body>{children}</body>
     </html>
-  );
+  )
 }
