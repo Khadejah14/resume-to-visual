@@ -40,6 +40,11 @@ export interface ResumeData {
   projects: Project[]
   certifications?: string[]
   languages?: string[]
+  customPrompt?: {
+    jobPosition: string
+    visualStyle: string
+    theme: string
+  }
 }
 
 export type ParseStatus = 'idle' | 'uploading' | 'parsing' | 'done' | 'error'

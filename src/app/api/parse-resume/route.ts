@@ -6,6 +6,16 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData()
     const file = formData.get('resume') as File | null
+    const customPromptStr = formData.get('customPrompt') as string | null
+    
+    let customPrompt = null
+    if (customPromptStr) {
+      try {
+        customPrompt = JSON.parse(customPromptStr)
+      } catch {
+        customPrompt = null
+      }
+    }
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -40,13 +50,15 @@ export async function POST(req: NextRequest) {
     let resumeData
 
     if (apiKey) {
-      resumeData = await parseWithAnthropic(extractedText, apiKey)
+      resumeData = await parseWithAnthropic(extractedText, apiKey, customPrompt)
     } else if (openAiKey) {
-      resumeData = await parseWithOpenAI(extractedText, openAiKey)
+      resumeData = await parseWithOpenAI(extractedText, openAiKey, customPrompt)
     } else {
       // Fallback: basic regex-based extraction for demo
-      resumeData = basicExtract(extractedText)
+      resumeData = basicExtract(extractedText, customPrompt)
     }
+
+    resumeData.customPrompt = customPrompt
 
     return NextResponse.json({ data: resumeData, rawText: extractedText.slice(0, 500) })
   } catch (err) {
@@ -101,7 +113,7 @@ const SYSTEM_PROMPT = `You are a resume parser. Extract structured data from the
   "languages": ["array of strings or empty array"]
 }`
 
-async function parseWithAnthropic(text: string, apiKey: string) {
+async function parseWithAnthropic(text: string, apiKey: string, customPrompt: { jobPosition: string; visualStyle: string; theme: string } | null) {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -123,7 +135,7 @@ async function parseWithAnthropic(text: string, apiKey: string) {
   return JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim())
 }
 
-async function parseWithOpenAI(text: string, apiKey: string) {
+async function parseWithOpenAI(text: string, apiKey: string, customPrompt: { jobPosition: string; visualStyle: string; theme: string } | null) {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -145,7 +157,7 @@ async function parseWithOpenAI(text: string, apiKey: string) {
   return JSON.parse(result.choices[0].message.content)
 }
 
-function basicExtract(text: string) {
+function basicExtract(text: string, customPrompt: { jobPosition: string; visualStyle: string; theme: string } | null) {
   const emailMatch = text.match(/[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}/)?.[0] || ''
   const phoneMatch = text.match(/[\+]?[\d\s\-().]{10,15}/)?.[0]?.trim() || ''
   const lines = text.split('\n').filter(l => l.trim())

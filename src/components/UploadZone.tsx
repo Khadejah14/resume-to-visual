@@ -1,8 +1,14 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { Upload, FileText, Loader2, AlertCircle } from 'lucide-react'
+import { Upload, FileText, Loader2, AlertCircle, Sparkles, ArrowRight } from 'lucide-react'
 import { ParseStatus } from '@/types/resume'
+
+interface CustomPrompt {
+  jobPosition: string
+  visualStyle: string
+  theme: string
+}
 
 interface UploadZoneProps {
   onParsed: (data: unknown) => void
@@ -14,6 +20,12 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
   const [dragOver, setDragOver] = useState(false)
   const [error, setError] = useState('')
   const [fileName, setFileName] = useState('')
+  const [showQuestions, setShowQuestions] = useState(true)
+  const [customPrompt, setCustomPrompt] = useState<CustomPrompt>({
+    jobPosition: '',
+    visualStyle: '',
+    theme: ''
+  })
 
   const processFile = useCallback(
     async (file: File) => {
@@ -27,6 +39,7 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
 
       const formData = new FormData()
       formData.append('resume', file)
+      formData.append('customPrompt', JSON.stringify(customPrompt))
 
       try {
         setStatus('parsing')
@@ -40,7 +53,7 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
         setStatus('error')
       }
     },
-    [onParsed, setStatus]
+    [onParsed, setStatus, customPrompt]
   )
 
   const onDrop = useCallback(
@@ -78,21 +91,77 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
         </p>
       </div>
 
+      {/* Question Modal */}
+      {showQuestions && (
+        <div className="w-full max-w-lg mb-8">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 animate-fade-up">
+            <div className="flex items-center gap-2 mb-6">
+              <Sparkles className="w-5 h-5 text-violet-400" />
+              <span className="text-white font-medium">Customize Your Visual</span>
+            </div>
+            
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm text-slate-400 mb-2">What is the job position you're targeting?</label>
+                <input
+                  type="text"
+                  value={customPrompt.jobPosition}
+                  onChange={(e) => setCustomPrompt({ ...customPrompt, jobPosition: e.target.value })}
+                  placeholder="e.g. Frontend Developer, Product Manager..."
+                  className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm outline-none ring-1 ring-slate-700 focus:ring-cyan-500/50"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-slate-400 mb-2">How would you like the visual to be?</label>
+                <input
+                  type="text"
+                  value={customPrompt.visualStyle}
+                  onChange={(e) => setCustomPrompt({ ...customPrompt, visualStyle: e.target.value })}
+                  placeholder="e.g. game, gallery, minimalist, futuristic..."
+                  className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm outline-none ring-1 ring-slate-700 focus:ring-cyan-500/50"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-slate-400 mb-2">What's the theme? What do you want to show behind your resume?</label>
+                <textarea
+                  value={customPrompt.theme}
+                  onChange={(e) => setCustomPrompt({ ...customPrompt, theme: e.target.value })}
+                  placeholder="e.g. I'm a person who believes in discipline, I'm an extrovert who loves connecting with people..."
+                  rows={3}
+                  className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm outline-none ring-1 ring-slate-700 focus:ring-cyan-500/50 resize-none"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowQuestions(false)}
+              className="w-full mt-6 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+            >
+              Continue to Upload
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Drop zone */}
-      <label
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={onDrop}
-        className={`
-          relative w-full max-w-lg cursor-pointer rounded-2xl border-2 border-dashed p-12
-          flex flex-col items-center gap-4 transition-all duration-300
-          ${dragOver
-            ? 'border-cyan-400 bg-cyan-500/10 scale-[1.02]'
-            : 'border-slate-700 bg-slate-900/50 hover:border-slate-500 hover:bg-slate-800/50'
-          }
-          ${isLoading ? 'pointer-events-none' : ''}
-        `}
-      >
+      {!showQuestions && (
+        <label
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+          onDragLeave={() => setDragOver(false) }
+          onDrop={onDrop}
+          className={`
+            relative w-full max-w-lg cursor-pointer rounded-2xl border-2 border-dashed p-12
+            flex flex-col items-center gap-4 transition-all duration-300
+            ${dragOver
+              ? 'border-cyan-400 bg-cyan-500/10 scale-[1.02]'
+              : 'border-slate-700 bg-slate-900/50 hover:border-slate-500 hover:bg-slate-800/50'
+            }
+            ${isLoading ? 'pointer-events-none' : ''}
+          `}
+        >
         <input
           type="file"
           accept=".pdf"
@@ -134,7 +203,8 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
         <div className="absolute top-3 right-3 w-3 h-3 border-t-2 border-r-2 border-cyan-500/40 rounded-tr" />
         <div className="absolute bottom-3 left-3 w-3 h-3 border-b-2 border-l-2 border-cyan-500/40 rounded-bl" />
         <div className="absolute bottom-3 right-3 w-3 h-3 border-b-2 border-r-2 border-cyan-500/40 rounded-br" />
-      </label>
+        </label>
+      )}
 
       {error && (
         <div className="mt-4 flex items-center gap-2 px-4 py-3 rounded-lg bg-red-900/30 border border-red-700/40 text-red-400 text-sm max-w-lg w-full">
