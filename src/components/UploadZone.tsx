@@ -77,12 +77,12 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
     <div className="flex flex-col items-center justify-center min-h-screen px-4">
       {/* Hero */}
       <div className="text-center mb-12 animate-fade-up">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono tracking-widest uppercase mb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-mono tracking-widest uppercase mb-6">
           Resume → Visual
         </div>
         <h1 className="text-5xl md:text-7xl font-serif font-normal tracking-tight text-white leading-none mb-4">
           Transform your<br />
-          <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-rose-400 to-violet-400 bg-clip-text text-transparent">
             résumé
           </span>
         </h1>
@@ -108,7 +108,7 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
                   value={customPrompt.jobPosition}
                   onChange={(e) => setCustomPrompt({ ...customPrompt, jobPosition: e.target.value })}
                   placeholder="e.g. Frontend Developer, Product Manager..."
-                  className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm outline-none ring-1 ring-slate-700 focus:ring-cyan-500/50"
+                  className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm outline-none ring-1 ring-slate-700 focus:ring-rose-500/50"
                 />
               </div>
 
@@ -119,7 +119,7 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
                   value={customPrompt.visualStyle}
                   onChange={(e) => setCustomPrompt({ ...customPrompt, visualStyle: e.target.value })}
                   placeholder="e.g. game, gallery, minimalist, futuristic..."
-                  className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm outline-none ring-1 ring-slate-700 focus:ring-cyan-500/50"
+                  className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm outline-none ring-1 ring-slate-700 focus:ring-rose-500/50"
                 />
               </div>
 
@@ -130,14 +130,14 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
                   onChange={(e) => setCustomPrompt({ ...customPrompt, theme: e.target.value })}
                   placeholder="e.g. I'm a person who believes in discipline, I'm an extrovert who loves connecting with people..."
                   rows={3}
-                  className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm outline-none ring-1 ring-slate-700 focus:ring-cyan-500/50 resize-none"
+                  className="w-full bg-slate-800 text-white rounded-lg px-4 py-3 text-sm outline-none ring-1 ring-slate-700 focus:ring-rose-500/50 resize-none"
                 />
               </div>
             </div>
 
             <button
               onClick={() => setShowQuestions(false)}
-              className="w-full mt-6 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
+              className="w-full mt-6 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-rose-500 to-violet-500 text-white font-semibold text-sm hover:opacity-90 transition-opacity"
             >
               Continue to Upload
               <ArrowRight className="w-4 h-4" />
@@ -156,7 +156,7 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
             relative w-full max-w-lg cursor-pointer rounded-2xl border-2 border-dashed p-12
             flex flex-col items-center gap-4 transition-all duration-300
             ${dragOver
-              ? 'border-cyan-400 bg-cyan-500/10 scale-[1.02]'
+              ? 'border-rose-400 bg-rose-500/10 scale-[1.02]'
               : 'border-slate-700 bg-slate-900/50 hover:border-slate-500 hover:bg-slate-800/50'
             }
             ${isLoading ? 'pointer-events-none' : ''}
@@ -172,10 +172,10 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
 
         <div className={`
           w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300
-          ${dragOver ? 'bg-cyan-500/20 rotate-3' : 'bg-slate-800'}
+          ${dragOver ? 'bg-rose-500/20 rotate-3' : 'bg-slate-800'}
         `}>
           {isLoading ? (
-            <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+            <Loader2 className="w-8 h-8 text-rose-400 animate-spin" />
           ) : (
             <Upload className="w-8 h-8 text-slate-400" />
           )}
@@ -188,7 +188,7 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
             </div>
             <div className="text-slate-500 text-sm">{fileName}</div>
             <div className="mt-4 w-48 h-1 bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-cyan-400 to-violet-400 rounded-full animate-shimmer" style={{ width: '60%' }} />
+              <div className="h-full bg-gradient-to-r from-rose-400 to-violet-400 rounded-full animate-shimmer" style={{ width: '60%' }} />
             </div>
           </div>
         ) : (
@@ -199,10 +199,10 @@ export default function UploadZone({ onParsed, status, setStatus }: UploadZonePr
         )}
 
         {/* Corner decorations */}
-        <div className="absolute top-3 left-3 w-3 h-3 border-t-2 border-l-2 border-cyan-500/40 rounded-tl" />
-        <div className="absolute top-3 right-3 w-3 h-3 border-t-2 border-r-2 border-cyan-500/40 rounded-tr" />
-        <div className="absolute bottom-3 left-3 w-3 h-3 border-b-2 border-l-2 border-cyan-500/40 rounded-bl" />
-        <div className="absolute bottom-3 right-3 w-3 h-3 border-b-2 border-r-2 border-cyan-500/40 rounded-br" />
+        <div className="absolute top-3 left-3 w-3 h-3 border-t-2 border-l-2 border-rose-500/40 rounded-tl" />
+        <div className="absolute top-3 right-3 w-3 h-3 border-t-2 border-r-2 border-rose-500/40 rounded-tr" />
+        <div className="absolute bottom-3 left-3 w-3 h-3 border-b-2 border-l-2 border-rose-500/40 rounded-bl" />
+        <div className="absolute bottom-3 right-3 w-3 h-3 border-b-2 border-r-2 border-rose-500/40 rounded-br" />
         </label>
       )}
 

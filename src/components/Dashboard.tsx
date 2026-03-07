@@ -35,7 +35,7 @@ function EditableText({
       onBlur: commit,
       onKeyDown: (e: React.KeyboardEvent) => { if (!multiline && e.key === 'Enter') commit() },
       autoFocus: true,
-      className: `bg-slate-800 text-white rounded px-2 py-1 text-sm w-full outline-none ring-1 ring-cyan-500/50 ${className}`,
+      className: `bg-slate-800 text-white rounded px-2 py-1 text-sm w-full outline-none ring-1 ring-rose-500/50 ${className}`,
       placeholder,
     }
     return multiline ? (
@@ -65,7 +65,7 @@ function SectionCard({ title, children, defaultOpen = true }: { title: string; c
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-800/50 transition-colors"
       >
-        <span className="text-xs font-mono tracking-widest uppercase text-cyan-400">{title}</span>
+        <span className="text-xs font-mono tracking-widest uppercase text-rose-400">{title}</span>
         {open ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
       </button>
       {open && <div className="px-5 pb-5">{children}</div>}
@@ -116,10 +116,10 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
   return (
     <div className="min-h-screen bg-[#0a0a12]">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-[#0a0a12]/90 border-b border-slate-800">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-[#0f0f14]/90 border-b border-slate-800">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-mono tracking-widest uppercase text-cyan-400">Resume-to-Visual</span>
+            <span className="text-xs font-mono tracking-widest uppercase text-rose-400">Resume-to-Visual</span>
             <span className="text-slate-700">·</span>
             <span className="text-slate-400 text-sm truncate max-w-[200px]">{data.name}</span>
           </div>
@@ -133,7 +133,7 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
             </button>
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-semibold text-sm transition-colors"
+              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-rose-500 to-violet-500 hover:opacity-90 text-white font-semibold text-sm transition-opacity"
             >
               {downloaded ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
               {downloaded ? 'Downloaded!' : 'Download HTML'}
@@ -148,12 +148,12 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
           <div className="lg:col-span-2 space-y-4">
             {/* Hero card */}
             <div className="relative bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-8 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-violet-500/5" />
+              <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-violet-500/5" />
               <div className="relative">
                 <div className="text-4xl font-serif text-white leading-tight mb-1">
                   <EditableText value={data.name} onChange={v => patch({ name: v })} className="text-4xl font-serif" placeholder="Your Name" />
                 </div>
-                <div className="text-cyan-400 font-medium mb-4">
+                <div className="text-rose-400 font-medium mb-4">
                   <EditableText value={data.title} onChange={v => patch({ title: v })} placeholder="Job Title" />
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm text-slate-400">
@@ -165,7 +165,7 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
                     <span key={key} className="flex items-center gap-1">
                       <span>{icon}</span>
                       <EditableText
-                        value={(data as Record<string, string>)[key]}
+                        value={(data as unknown as Record<string, string>)[key]}
                         onChange={v => patch({ [key]: v } as Partial<ResumeData>)}
                         placeholder={label}
                       />
@@ -212,7 +212,7 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
                       </div>
                       <div>
                         <div className="text-xs text-slate-500 mb-0.5">Company</div>
-                        <EditableText value={exp.company} onChange={v => updateExp(i, { company: v })} className="text-cyan-400" placeholder="Company" />
+                        <EditableText value={exp.company} onChange={v => updateExp(i, { company: v })} className="text-rose-400" placeholder="Company" />
                       </div>
                       <div>
                         <div className="text-xs text-slate-500 mb-0.5">Start</div>
@@ -293,12 +293,12 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
                 value={data.skills.join(', ')}
                 onChange={e => patch({ skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
                 rows={4}
-                className="w-full bg-slate-800 text-slate-300 rounded-lg px-3 py-2 text-sm outline-none ring-1 ring-slate-700 focus:ring-cyan-500/50 resize-none"
+                className="w-full bg-slate-800 text-slate-300 rounded-lg px-3 py-2 text-sm outline-none ring-1 ring-slate-700 focus:ring-rose-500/50 resize-none"
                 placeholder="React, TypeScript, Node.js…"
               />
               <div className="flex flex-wrap gap-1.5 mt-3">
                 {data.skills.slice(0, 20).map(s => (
-                  <span key={s} className="px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs">
+                  <span key={s} className="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs">
                     {s}
                   </span>
                 ))}
@@ -343,20 +343,20 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
                   value={(data.certifications || []).join('\n')}
                   onChange={e => patch({ certifications: e.target.value.split('\n').filter(Boolean) })}
                   rows={3}
-                  className="w-full bg-slate-800 text-slate-300 rounded-lg px-3 py-2 text-sm outline-none ring-1 ring-slate-700 focus:ring-cyan-500/50 resize-none"
+                  className="w-full bg-slate-800 text-slate-300 rounded-lg px-3 py-2 text-sm outline-none ring-1 ring-slate-700 focus:ring-rose-500/50 resize-none"
                 />
               </SectionCard>
             )}
 
             {/* Export info */}
-            <div className="bg-gradient-to-br from-violet-900/20 to-cyan-900/20 border border-violet-500/20 rounded-xl p-4">
-              <div className="text-xs font-mono tracking-wider uppercase text-violet-400 mb-2">Export Ready</div>
+            <div className="bg-gradient-to-br from-rose-900/20 to-violet-900/20 border border-rose-500/20 rounded-xl p-4">
+              <div className="text-xs font-mono tracking-wider uppercase text-rose-400 mb-2">Export Ready</div>
               <p className="text-slate-400 text-xs leading-relaxed mb-3">
                 Your HTML resume is self-contained — all styles are inlined, no CDN needed.
               </p>
               <button
                 onClick={handleDownload}
-                className="w-full py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-violet-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                className="w-full py-2 rounded-lg bg-gradient-to-r from-rose-500 to-violet-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
               >
                 <Download className="w-4 h-4" />
                 Download Resume
