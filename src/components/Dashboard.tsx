@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { Download, Plus, Trash2, RefreshCw, ChevronDown, ChevronUp, Edit3, Check } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Download, Plus, Trash2, RefreshCw, ChevronDown, ChevronUp, Edit3, Check, Image, Loader2 } from 'lucide-react'
+import html2canvas from 'html2canvas'
 import { ResumeData, WorkExperience, Education, Project } from '@/types/resume'
 import { generateResumeHTML } from '@/lib/generateHTML'
 
@@ -76,8 +77,33 @@ function SectionCard({ title, children, defaultOpen = true }: { title: string; c
 export default function Dashboard({ data: initialData, onReset }: DashboardProps) {
   const [data, setData] = useState<ResumeData>(initialData)
   const [downloaded, setDownloaded] = useState(false)
+  const [converting, setConverting] = useState(false)
+  const [visualUrl, setVisualUrl] = useState<string | null>(null)
+  const previewRef = useRef<HTMLDivElement>(null)
 
   const patch = (partial: Partial<ResumeData>) => setData(d => ({ ...d, ...partial }))
+
+  const handleConvertToVisual = async () => {
+    if (!previewRef.current) return
+    
+    setConverting(true)
+    setVisualUrl(null)
+
+    try {
+      const canvas = await html2canvas(previewRef.current, {
+        scale: 2,
+        backgroundColor: '#0f0f14',
+        logging: false,
+      })
+
+      const url = canvas.toDataURL('image/png')
+      setVisualUrl(url)
+    } catch (err) {
+      console.error('Conversion error:', err)
+    } finally {
+      setConverting(false)
+    }
+  }
 
   const handleDownload = () => {
     const html = generateResumeHTML(data)
@@ -125,6 +151,14 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={handleConvertToVisual}
+              disabled={converting}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 hover:opacity-90 text-white font-semibold text-sm transition-opacity disabled:opacity-50"
+            >
+              {converting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Image className="w-4 h-4" />}
+              {converting ? 'Converting...' : 'Convert to Visual'}
+            </button>
+            <button
               onClick={onReset}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-sm"
             >
@@ -146,6 +180,8 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: Preview panel */}
           <div className="lg:col-span-2 space-y-4">
+            {/* Preview container for html2canvas */}
+            <div ref={previewRef} className="bg-[#0f0f14] p-6 rounded-xl">
             {/* Hero card */}
             <div className="relative bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-8 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-violet-500/5" />
@@ -347,6 +383,37 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
                 />
               </SectionCard>
             )}
+
+            {/* Visual Preview */}
+            {(visualUrl || converting) && (
+              <div className="bg-gradient-to-br from-violet-900/20 to-indigo-900/20 border border-violet-500/20 rounded-xl p-4">
+                <div className="text-xs font-mono tracking-wider uppercase text-violet-400 mb-2">
+                  {converting ? 'Generating Visual...' : 'Visual Ready!'}
+                </div>
+                {converting && (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-8 h-8 text-violet-400 animate-spin" />
+                  </div>
+                )}
+                {visualUrl && (
+                  <>
+                    <div className="rounded-lg overflow-hidden bg-slate-800 mb-3">
+                      <img src={visualUrl} alt="Resume Visual" className="w-full h-auto" />
+                    </div>
+                    <a
+                      href={visualUrl}
+                      download={`${data.name.replace(/\s+/g, '_')}_visual.png`}
+                      className="w-full py-2 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download PNG
+                    </a>
+                  </>
+                )}
+              </div>
+            )}
+
+            </div>{/* End preview ref container */}
 
             {/* Export info */}
             <div className="bg-gradient-to-br from-rose-900/20 to-violet-900/20 border border-rose-500/20 rounded-xl p-4">
