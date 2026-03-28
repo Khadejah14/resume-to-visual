@@ -35,8 +35,19 @@ export async function POST(req: NextRequest) {
       const pdfData = await pdfParse(buffer)
       extractedText = pdfData.text
     } catch {
-      // Fallback: try to extract readable text from buffer
-      extractedText = buffer.toString('utf-8').replace(/[^\x20-\x7E\n]/g, ' ').replace(/\s+/g, ' ')
+      // Improved fallback: try multiple encodings and extract readable text
+      let textUtf8 = buffer.toString('utf-8')
+      let textLatin1 = buffer.toString('latin1')
+      // Extract sequences of printable characters (words, lines)
+      const extractReadable = (str: string) =>
+        (str.match(/[\x20-\x7E\n]{3,}/g) || []).join(' ')
+      let extracted = extractReadable(textUtf8)
+      // If too short, try latin1
+      if (!extracted || extracted.length < 50) {
+        extracted = extractReadable(textLatin1)
+      }
+      // Final cleanup: collapse whitespace
+      extractedText = extracted.replace(/\s+/g, ' ').trim()
     }
 
     if (!extractedText || extractedText.trim().length < 50) {
@@ -62,10 +73,24 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data: resumeData, rawText: extractedText.slice(0, 500) })
   } catch (err) {
-    console.error('Parse error:', err)
-    return NextResponse.json({ error: 'Failed to parse resume' }, { status: 500 })
+    console.error('Parse error:', err);
+    if (
+      err instanceof Error &&
+      err.message &&
+      err.message.includes('Failed to parse AI response as JSON')
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'The AI could not parse your resume into structured data. Please try again, adjust your resume formatting, or use a different file.',
+        },
+        { status: 502 }
+      );
+    }
+    return NextResponse.json({ error: 'Failed to parse resume' }, { status: 500 });
   }
 }
+
 
 const SYSTEM_PROMPT = `You are a resume parser. Extract structured data from the resume text and return ONLY valid JSON matching this schema exactly. No markdown, no explanation, just the JSON object.
 
@@ -132,7 +157,12 @@ async function parseWithAnthropic(text: string, apiKey: string, customPrompt: { 
   if (!response.ok) throw new Error(`Anthropic API error: ${response.status}`)
   const result = await response.json()
   const content = result.content[0]?.text || ''
-  return JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim())
+  try {
+    return JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim())
+  } catch (err) {
+    console.error('Anthropic API response JSON parse error:', err, '\nRaw content:', content)
+    throw new Error('Failed to parse AI response as JSON. Please try again or adjust your resume.')
+  }
 }
 
 async function parseWithOpenAI(text: string, apiKey: string, customPrompt: { jobPosition: string; visualStyle: string; theme: string } | null) {
@@ -154,7 +184,12 @@ async function parseWithOpenAI(text: string, apiKey: string, customPrompt: { job
 
   if (!response.ok) throw new Error(`OpenAI API error: ${response.status}`)
   const result = await response.json()
-  return JSON.parse(result.choices[0].message.content)
+  try {
+    return JSON.parse(result.choices[0].message.content)
+  } catch (err) {
+    console.error('OpenAI API response JSON parse error:', err, '\nRaw content:', result.choices[0].message.content)
+    throw new Error('Failed to parse AI response as JSON. Please try again or adjust your resume.')
+  }
 }
 
 function basicExtract(text: string, customPrompt: { jobPosition: string; visualStyle: string; theme: string } | null) {

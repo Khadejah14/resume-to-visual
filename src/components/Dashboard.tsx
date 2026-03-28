@@ -6,6 +6,23 @@ import html2canvas from 'html2canvas'
 import { ResumeData, WorkExperience, Education, Project } from '@/types/resume'
 import { generateResumeHTML } from '@/lib/generateHTML'
 
+// PDF export helper
+async function exportPDF(data: ResumeData): Promise<Blob | null> {
+  try {
+    const res = await fetch('/api/export-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) throw new Error('Failed to export PDF')
+    const blob = await res.blob()
+    return blob
+  } catch (err) {
+    alert('PDF export failed. Please try again.')
+    return null
+  }
+}
+
 interface DashboardProps {
   data: ResumeData
   onReset: () => void
@@ -79,6 +96,7 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
   const [downloaded, setDownloaded] = useState(false)
   const [converting, setConverting] = useState(false)
   const [visualUrl, setVisualUrl] = useState<string | null>(null)
+  const [pdfLoading, setPdfLoading] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
 
   const patch = (partial: Partial<ResumeData>) => setData(d => ({ ...d, ...partial }))
@@ -116,6 +134,21 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
     URL.revokeObjectURL(url)
     setDownloaded(true)
     setTimeout(() => setDownloaded(false), 2000)
+  }
+
+  // PDF Download handler
+  const handleDownloadPDF = async () => {
+    setPdfLoading(true)
+    const blob = await exportPDF(data)
+    setPdfLoading(false)
+    if (blob) {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${data.name.replace(/\s+/g, '_')}_resume.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
   }
 
   // Experience helpers
@@ -171,6 +204,14 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
             >
               {downloaded ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
               {downloaded ? 'Downloaded!' : 'Download HTML'}
+            </button>
+            <button
+              onClick={handleDownloadPDF}
+              disabled={pdfLoading}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-slate-700 to-slate-900 hover:opacity-90 text-white font-semibold text-sm transition-opacity disabled:opacity-50"
+            >
+              {pdfLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {pdfLoading ? 'Exporting PDF...' : 'Download PDF'}
             </button>
           </div>
         </div>
@@ -423,10 +464,18 @@ export default function Dashboard({ data: initialData, onReset }: DashboardProps
               </p>
               <button
                 onClick={handleDownload}
-                className="w-full py-2 rounded-lg bg-gradient-to-r from-rose-500 to-violet-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                className="w-full py-2 rounded-lg bg-gradient-to-r from-rose-500 to-violet-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mb-2"
               >
                 <Download className="w-4 h-4" />
                 Download Resume
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                disabled={pdfLoading}
+                className="w-full py-2 rounded-lg bg-gradient-to-r from-slate-700 to-slate-900 text-white text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {pdfLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {pdfLoading ? 'Exporting PDF...' : 'Download PDF'}
               </button>
             </div>
           </div>
